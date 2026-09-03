@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'registerpage.dart';
-//import 'client_home_page.dart';
-//import 'veterinaire_home_page.dart';
+import 'client_home_page.dart';
+import 'veterinaire_home_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -10,6 +13,52 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> seConnecter() async {
+    setState(() => isLoading = true);
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user!.uid)
+          .get();
+
+      final type = userDoc.data()?['type'];
+
+      if (!mounted) return;
+      if (type == 'veterinaire') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const VeterinaireHomePage()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ClientHomePage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Erreur lors de la connexion")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,13 +66,11 @@ class _LoginPageState extends State<LoginPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          //E1
           const Icon(
             Icons.pets,
             size: 100,
             color: Colors.green,
           ),
-          //E2
           const Text(
             "Connexion",
             style: TextStyle(
@@ -32,7 +79,6 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.black,
               ),
           ),
-          //E3
           const SizedBox(
             height: 50,
           ),
@@ -44,8 +90,9 @@ class _LoginPageState extends State<LoginPage> {
               border: Border.all(color:Colors.black),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
                 border: InputBorder.none,
                 labelText: "Email",
                 labelStyle: TextStyle(
@@ -55,7 +102,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          //E4
           Container(
             padding: const EdgeInsets.only(
               left: 25,
@@ -66,8 +112,10 @@ class _LoginPageState extends State<LoginPage> {
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
                 border: InputBorder.none,
                 labelText: "Mot de passe",
                 labelStyle: TextStyle(
@@ -78,7 +126,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          //E5
           Container(
             margin: const EdgeInsets.symmetric(
               horizontal: 40,
@@ -87,10 +134,13 @@ class _LoginPageState extends State<LoginPage> {
             height: 50,
             width: double.infinity,
             child: ElevatedButton(
-        onPressed: () {},              style: ElevatedButton.styleFrom(
+              onPressed: isLoading ? null : seConnecter,
+              style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,elevation: 10
               ),
-              child: const Text(
+              child: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
                 "Se connecter",
                 style: TextStyle(fontSize: 20,color: Colors.white),
               ),

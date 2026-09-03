@@ -21,10 +21,11 @@ class _RegisterPageState extends State<RegisterPage> {
   final telephoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final specialiteController = TextEditingController();
+  final adresseCabinetController = TextEditingController();
 
   bool isLoading = false;
   Future<void> sInscrire() async {
-  // Vérification simple avant d'appeler Firebase
   if (passwordController.text != confirmPasswordController.text) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Les mots de passe ne correspondent pas")),
@@ -35,22 +36,26 @@ class _RegisterPageState extends State<RegisterPage> {
   setState(() => isLoading = true);
 
   try {
-    // 1. Création du compte dans Firebase Authentication
     final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: emailController.text.trim(),
       password: passwordController.text,
     );
 
-    // 2. Sauvegarde des infos complémentaires (dont le type de profil) dans Firestore
-    await FirebaseFirestore.instance.collection('users').doc(credential.user!.uid).set({
+    final userData = {
       'prenom': prenomController.text.trim(),
       'nom': nomController.text.trim(),
       'email': emailController.text.trim(),
       'telephone': telephoneController.text.trim(),
-      'type': _selectedProfile.name, // "client" ou "veterinaire"
-    });
+      'type': _selectedProfile.name,
+    };
 
-    // 3. Redirection selon le type choisi
+    if (_selectedProfile == TypeProfile.veterinaire) {
+      userData['specialite'] = specialiteController.text.trim();
+      userData['adresseCabinet'] = adresseCabinetController.text.trim();
+    }
+
+    await FirebaseFirestore.instance.collection('users').doc(credential.user!.uid).set(userData);
+
     if (!mounted) return;
     if (_selectedProfile == TypeProfile.client) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ClientHomePage()));
@@ -62,23 +67,28 @@ class _RegisterPageState extends State<RegisterPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(e.message ?? "Erreur lors de l'inscription")),
     );
+  } catch (e) {
+    setState(() => isLoading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Erreur lors de l'inscription : $e")),
+    );
   }
 }
   @override
     void dispose() {
-      // Toujours libérer les controllers pour éviter les fuites mémoire
       prenomController.dispose();
       nomController.dispose();
       emailController.dispose();
       telephoneController.dispose();
       passwordController.dispose();
       confirmPasswordController.dispose();
+      specialiteController.dispose();
+      adresseCabinetController.dispose();
       super.dispose();
     }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //height: double.infinity,
-      //width: double.infinity,
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
       child: Column(
@@ -89,7 +99,6 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 20,
           children: [
-          //E1
           const Icon(
             Icons.pets,
             size: 40,
@@ -211,6 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             child: TextField(
               controller: passwordController,
+              obscureText: true,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 labelText: "Choisir mot de passe",
@@ -235,6 +245,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             child: TextField(
               controller: confirmPasswordController,
+              obscureText: true,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 labelText: "Confirmer le mot de passe",
@@ -277,18 +288,18 @@ SegmentedButton<TypeProfile>(
   style: ButtonStyle(
     backgroundColor:  WidgetStateProperty.resolveWith<Color?>((states){
      if (states.contains(WidgetState.selected)) {
-        return Colors.green; // Couleur quand le segment est sélectionné
+        return Colors.green;
       }
-      return Colors.grey[200]; // Couleur quand le segment est inactif
+      return Colors.grey[200];
     }),
   ),),
-  // Après tes champs communs, avant le bouton "S'inscrire"
 if (_selectedProfile == TypeProfile.veterinaire) ...[
   const SizedBox(height: 20),
   Container(
     padding: EdgeInsets.all(10),
-    child: const TextField(
-      decoration: InputDecoration(
+    child: TextField(
+      controller: specialiteController,
+      decoration: const InputDecoration(
         labelText: "Spécialité",
         icon: Icon(Icons.medical_services),
       ),
@@ -297,8 +308,9 @@ if (_selectedProfile == TypeProfile.veterinaire) ...[
   const SizedBox(height: 20),
   Container(
     padding: EdgeInsets.all(10),
-    child: const TextField(
-      decoration: InputDecoration(
+    child: TextField(
+      controller: adresseCabinetController,
+      decoration: const InputDecoration(
         labelText: "Adresse du cabinet",
         icon: Icon(Icons.location_on),
       ),
@@ -314,6 +326,9 @@ if (_selectedProfile == TypeProfile.veterinaire) ...[
             width: double.infinity,
             child: ElevatedButton(
                 onPressed: isLoading ? null : sInscrire,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,elevation: 10
+                ),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("S'Inscrire",                 style: TextStyle(fontSize: 20,color: Colors.white),
