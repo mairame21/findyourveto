@@ -57,11 +57,20 @@ class _RegisterPageState extends State<RegisterPage> {
     await FirebaseFirestore.instance.collection('users').doc(credential.user!.uid).set(userData);
 
     if (!mounted) return;
-    if (_selectedProfile == TypeProfile.client) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ClientHomePage()));
-    } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const VeterinaireHomePage()));
-    }
+
+setState(() => isLoading = false);
+
+if (_selectedProfile == TypeProfile.client) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const ClientHomePage()),
+  );
+} else {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const VeterinaireHomePage()),
+  );
+}
   } on FirebaseAuthException catch (e) {
     setState(() => isLoading = false);
     ScaffoldMessenger.of(context).showSnackBar(
