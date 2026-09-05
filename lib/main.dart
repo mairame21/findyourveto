@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import "loginpage.dart";
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const FindYourVeto());
-}class FindYourVeto extends StatelessWidget {
+void main(){
+    runApp(const FindYourVeto());
+}
+
+class FindYourVeto extends StatelessWidget {
   const FindYourVeto({super.key});
 
   @override
