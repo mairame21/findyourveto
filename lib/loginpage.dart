@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import "registerpage.dart";
 import "client_home_page.dart";
-import "veterinairehomepage.dart";
+import "veterinaire_home_page.dart";
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -14,7 +14,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body:Column(
+      body:SingleChildScrollView(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           Container(
             margin: const EdgeInsets.symmetric(
-             horizontal: 40,
+              horizontal: 40,
             ),
             height: 50,
             width: double.infinity,
@@ -142,6 +143,7 @@ class _LoginPageState extends State<LoginPage> {
           )
         ]
       )
+    )
     );
   }
 }

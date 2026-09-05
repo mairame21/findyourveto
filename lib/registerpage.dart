@@ -14,7 +14,8 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: SingleChildScrollView(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(
@@ -139,6 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
           )
         ]
       )
+    )
     );
   }
 }
