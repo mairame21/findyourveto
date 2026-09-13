@@ -10,14 +10,44 @@ class VetoDetailPage extends StatefulWidget {
   State<VetoDetailPage> createState() => _VetoDetailPageState();
 }
 
-class _VetoDetailPageState extends State<VetoDetailPage> {
+class _VetoDetailPageState extends State<VetoDetailPage> { 
   List<String> creneaux = ["08:00", "09:30", "14:00"];
-  String creneauChoisi = "";
+  int indexChoisi = -1;
+
+  Widget buildBoutonCreneau(int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            indexChoisi = index;
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: indexChoisi == index ? Colors.green : Colors.grey[200],
+          foregroundColor: indexChoisi == index ? Colors.white : Colors.black,
+        ),
+        child: Text(creneaux[index]),
+      ),
+    );
+  }
+
+  Row buildLigneCreneaux() {
+    return Row(
+      children: [
+        for (int i = 0; i < creneaux.length; i++) buildBoutonCreneau(i),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.nom)),
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        title: Text(widget.nom),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -27,46 +57,15 @@ class _VetoDetailPageState extends State<VetoDetailPage> {
             const SizedBox(height: 20),
             const Text("Choisir un créneau", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Row(
-              children: creneaux.map((c) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: ChoiceChip(
-                    label: Text(c),
-                    selected: creneauChoisi == c,
-                    onSelected: (selectionne) {
-                      setState(() {
-                        creneauChoisi = selectionne ? c : "";
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
+            buildLigneCreneaux(),
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  if (creneauChoisi == "") {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Choisissez un créneau")),
-                    );
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Demande envoyée"),
-                        content: Text("RDV avec ${widget.nom} à $creneauChoisi"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("OK"),
-                          ),
-                        ],
-                      ),
-                    );
+                  if (indexChoisi != -1) {
+                    Navigator.pop(context);
                   }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),

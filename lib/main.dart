@@ -1,34 +1,23 @@
 import 'package:flutter/material.dart';
-import "loginpage.dart";
+import 'loginpage.dart';
 
-void main(){
-    runApp(const FindYourVeto());
+void main() {
+  runApp(const MyApp());
 }
 
-class FindYourVeto extends StatelessWidget {
-  const FindYourVeto({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'findyourveto',
-        debugShowCheckedModeBanner: false,
-        home: HomePage(),
-    );
-  }
-}
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: LoginPage(),
+      title: 'findyourveto',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
+      ),
+      home: const LoginPage(),
     );
   }
 }

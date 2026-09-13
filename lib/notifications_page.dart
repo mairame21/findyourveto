@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
 
+  List<String> get titres => ["Alerte épidémie", "Rappel vaccin"];
+  List<String> get descriptions => [
+        "Cas de grippe aviaire signalés dans la région de Saint-Louis.",
+        "Le vaccin Rage de Rex arrive à échéance dans 5 jours.",
+      ];
+
   @override
   Widget build(BuildContext context) {
-    List<String> titres = ["Alerte épidémie", "Rappel vaccin"];
-    List<String> descriptions = [
-      "Cas de grippe aviaire signalés dans la région de Saint-Louis.",
-      "Le vaccin Rage de Rex arrive à échéance dans 5 jours.",
-    ];
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Notifications")),
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        title: const Text("Notifications"),
+      ),
       body: ListView.builder(
         itemCount: titres.length,
         itemBuilder: (context, index) {

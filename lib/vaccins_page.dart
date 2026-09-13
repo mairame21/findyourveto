@@ -3,19 +3,23 @@ import 'package:flutter/material.dart';
 class VaccinsPage extends StatelessWidget {
   const VaccinsPage({super.key});
 
+  List<String> get nomsVaccins => ["Rage", "Typhus"];
+  List<String> get dates => ["Dans 5 jours", "Dans 30 jours"];
+
   @override
   Widget build(BuildContext context) {
-    List<String> nomsVaccins = ["Rage", "Typhus"];
-    List<String> dates = ["Dans 5 jours", "Dans 30 jours"];
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Rappels de vaccins")),
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        title: const Text("Rappels de vaccins"),
+      ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
         itemCount: nomsVaccins.length,
         itemBuilder: (context, index) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+          return Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
             child: ListTile(
               leading: const Icon(Icons.vaccines, color: Colors.green),
               title: Text(nomsVaccins[index]),
