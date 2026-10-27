@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'bouton_colore.dart';
+import 'champ_texte.dart';
 import 'registerpage.dart';
 import 'client_home_page.dart';
 import 'veterinaire_home_page.dart';
+import 'service_firebase.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,102 +14,113 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body:  Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+  TextEditingController controllerEmail = TextEditingController();
+  TextEditingController controllerMotDePasse = TextEditingController();
+  String erreur = "";
+  bool enCours = false;
+
+  Future<void> seConnecter() async {
+    if (enCours == false) {
+      setState(() {
+        enCours = true;
+        erreur = "";
+      });
+      var message = await ServiceFirebase.connecter(controllerEmail.text, controllerMotDePasse.text);
+      var type = "";
+      if (message == "") {
+        type = await ServiceFirebase.lireType();
+      }
+      if (mounted) {
+        setState(() {
+          enCours = false;
+          erreur = message;
+        });
+        if (message == "") {
+          if (type == "veterinaire") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const VeterinaireHomePage()),
+            );
+          } else if (type == "client") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ClientHomePage()),
+            );
+          } else {
+            setState(() {
+              erreur = "Profil introuvable pour ce compte";
+            });
+          }
+        }
+      }
+    }
+  }
+
+  Column buildColumnForm() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Icon(Icons.pets, size: 100, color: Colors.green),
-        const Text(
-          "Connexion",
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 30, color: Colors.black),
-        ),
-        const SizedBox(height: 50),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Email",
-              icon: Icon(Icons.email_outlined, color: Colors.green),
-            ),
+        const Center(
+          child: Text(
+            "Connexion",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Mot de passe",
-              icon: Icon(Icons.lock_clock_outlined, color: Colors.green),
-              suffixIcon: Icon(Icons.visibility_off),
-            ),
+        const SizedBox(height: 40),
+        ChampTexte(
+          label: "Email",
+          icone: Icons.email_outlined,
+          controller: controllerEmail,
+        ),
+        ChampTexte(
+          label: "Mot de passe",
+          icone: Icons.lock_clock_outlined,
+          masque: true,
+          suffixe: const Icon(Icons.visibility_off),
+          controller: controllerMotDePasse,
+        ),
+        erreur == ""
+            ? const SizedBox()
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+                child: Text(erreur, style: const TextStyle(color: Colors.red)),
+              ),
+        const SizedBox(height: 15),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+          child: BoutonColore(
+            texteBouton: enCours ? "Connexion..." : "Se connecter",
+            onPressed: seConnecter,
           ),
         ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-          height: 50,
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ClientHomePage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text("Se connecter", style: TextStyle(fontSize: 20, color: Colors.white)),
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          height: 50,
-          width: double.infinity,
-          child: ElevatedButton(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+          child: BoutonColore(
+            couleur: Colors.white,
+            couleurTexte: Colors.green,
+            texteBouton: "S'inscrire",
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const RegisterPage()),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
-            child: const Text("S'inscrire", style: TextStyle(fontSize: 20)),
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-          height: 50,
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const VeterinaireHomePage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
-            child: const Text("Se connecter en tant que vétérinaire", style: TextStyle(fontSize: 15)),
           ),
         ),
       ],
-    ),
-  );
- }
-}  
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: ListView(
+        padding: const EdgeInsets.only(top: 60, bottom: 30),
+        children: [buildColumnForm()],
+      ),
+    );
+  }
+}

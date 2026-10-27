@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'loginpage.dart';
+import 'bouton_colore.dart';
+import 'champ_texte.dart';
 import 'client_home_page.dart';
+import 'veterinaire_home_page.dart';
+import 'service_firebase.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -10,124 +13,162 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  TextEditingController controllerNom = TextEditingController();
+  TextEditingController controllerEmail = TextEditingController();
+  TextEditingController controllerMotDePasse = TextEditingController();
+  TextEditingController controllerSpecialite = TextEditingController();
+  TextEditingController controllerAdresse = TextEditingController();
+  String type = "client";
+  String erreur = "";
+  bool enCours = false;
+
+  Future<void> sInscrire() async {
+    if (enCours == false) {
+      setState(() {
+        enCours = true;
+        erreur = "";
+      });
+      var message = await ServiceFirebase.inscrire(
+        controllerNom.text,
+        controllerEmail.text,
+        controllerMotDePasse.text,
+        type,
+        controllerSpecialite.text,
+        controllerAdresse.text,
+      );
+      if (mounted) {
+        setState(() {
+          enCours = false;
+          erreur = message;
+        });
+        if (message == "") {
+          if (type == "veterinaire") {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const VeterinaireHomePage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ClientHomePage()),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  Widget buildBoutonType(String texte, String valeur) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              type = valeur;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: type == valeur ? Colors.green : Colors.grey[200],
+            foregroundColor: type == valeur ? Colors.white : Colors.black,
+          ),
+          child: Text(texte),
+        ),
+      ),
+    );
+  }
+
+  Widget buildChoixType() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+      child: Row(
+        children: [
+          buildBoutonType("Client", "client"),
+          buildBoutonType("Vétérinaire", "veterinaire"),
+        ],
+      ),
+    );
+  }
+
+  Widget buildChampsVeterinaire() {
+    return Column(
+      children: [
+        ChampTexte(
+          label: "Spécialité",
+          icone: Icons.medical_services,
+          controller: controllerSpecialite,
+        ),
+        ChampTexte(
+          label: "Adresse du cabinet",
+          icone: Icons.location_on,
+          controller: controllerAdresse,
+        ),
+      ],
+    );
+  }
+
+  Column buildColumnForm() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Icon(Icons.pets, size: 100, color: Colors.green),
+        const Center(
+          child: Text(
+            "Inscription",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+          ),
+        ),
+        const SizedBox(height: 40),
+        ChampTexte(label: "Nom", icone: Icons.person, controller: controllerNom),
+        ChampTexte(label: "Email", icone: Icons.email_outlined, controller: controllerEmail),
+        ChampTexte(
+          label: "Mot de passe",
+          icone: Icons.lock_clock_outlined,
+          masque: true,
+          suffixe: const Icon(Icons.visibility_off),
+          controller: controllerMotDePasse,
+        ),
+        buildChoixType(),
+        type == "veterinaire" ? buildChampsVeterinaire() : const SizedBox(),
+        erreur == ""
+            ? const SizedBox()
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+                child: Text(erreur, style: const TextStyle(color: Colors.red)),
+              ),
+        const SizedBox(height: 15),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+          child: BoutonColore(
+            texteBouton: enCours ? "Inscription..." : "S'inscrire",
+            onPressed: sInscrire,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
+          child: BoutonColore(
+            couleur: Colors.white,
+            couleurTexte: Colors.green,
+            tailleTexte: 15,
+            texteBouton: "Déjà un compte ? Connectez-vous",
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.pets, size: 100, color: Colors.green),
-        const Text(
-          "Inscription",
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 30, color: Colors.black),
-        ),
-        const SizedBox(height: 50),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Prenom",
-              icon: Icon(Icons.person, color: Colors.green),
-            ),
-          ),
-        ),
-        const SizedBox(height: 25),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Nom",
-              icon: Icon(Icons.person, color: Colors.green),
-            ),
-          ),
-        ),
-        const SizedBox(height: 25),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Email",
-              icon: Icon(Icons.email_outlined, color: Colors.green),
-            ),
-          ),
-        ),
-        const SizedBox(height: 25),
-        Container(
-          padding: const EdgeInsets.only(left: 25),
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 234, 248, 218),
-            border: Border.all(color: Colors.black),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: "Mot de passe",
-              icon: Icon(Icons.lock_clock_outlined, color: Colors.green),
-              suffixIcon: Icon(Icons.visibility_off),
-            ),
-          ),
-        ),
-        const SizedBox(height: 40),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          height: 50,
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ClientHomePage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text("S'inscrire", style: TextStyle(fontSize: 20, color: Colors.white)),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          height: 50,
-          width: double.infinity ,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
-            child: const Text("Deja un compte ? Connectez-vous", style: TextStyle(fontSize: 15)),
-          ),
-        ),
-      ],
+      body: ListView(
+        padding: const EdgeInsets.only(top: 60, bottom: 30),
+        children: [buildColumnForm()],
       ),
-    ),
-   );
+    );
   }
 }

@@ -1,118 +1,109 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'panneau_arrondi.dart';
+import 'veto_tile.dart';
 import 'veto_detail_page.dart';
-import 'dossier_medical_page.dart';
-import 'vaccins_page.dart';
-import 'symptomes_page.dart';
+import 'mes_animaux_page.dart';
+import 'mes_rdv_page.dart';
 import 'messagerie_page.dart';
 import 'conseils_page.dart';
 import 'notifications_page.dart';
 
-class ClientHomePage extends StatefulWidget {
+class ClientHomePage extends StatelessWidget {
   const ClientHomePage({super.key});
 
-  @override
-  State<ClientHomePage> createState() => _ClientHomePageState();
-}
-
-class _ClientHomePageState extends State<ClientHomePage> {
-  int indexActuel = 0;
-
-  List<String> nomsVeterinaires = ["Dr. Fatou Sarr", "Dr. Moussa Ba", "Dr. Awa Ndiaye"];
-  List<String> specialitesVeterinaires = ["Animaux domestiques - Sanar", "Élevage bovin - Sor", "Chirurgie - Nord"];
-
-  List<String> rendezVous = [
-    "Rex - Dr. Fatou Sarr - 09:30 - En attente",
-    "Minou - Dr. Awa Ndiaye - 13:00 - Accepté",
-  ];
-
-  Widget buildLigneMenu(IconData icon, String texte, Widget page) {
+  Widget buildBarreRecherche() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(left: 15),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.green),
-        title: Text(texte),
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-        },
+      child: const TextField(
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: "Rechercher un vétérinaire, une ville...",
+          icon: Icon(Icons.search),
+        ),
       ),
     );
   }
 
-  Widget buildRecherche() {
-    return ListView.builder(
-      itemCount: nomsVeterinaires.length,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Icon(Icons.medical_services, color: Colors.white),
+  Widget buildBandeau() {
+    return PanneauArrondi(
+      color: const Color(0xFFEAF8DA),
+      child: const Row(
+        children: [
+          Icon(Icons.location_on, color: Colors.green, size: 40),
+          SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Vétérinaires disponibles près de vous",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text("4 vétérinaires dans un rayon de 10 km"),
+              ],
             ),
-            title: Text(nomsVeterinaires[index]),
-            subtitle: Text(specialitesVeterinaires[index]),
-            onTap: () {
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildRaccourci(BuildContext context, IconData icone, String label, Widget page) {
+    return Column(
+      children: [
+        CircleAvatar(
+          backgroundColor: const Color(0xFFEAF8DA),
+          child: IconButton(
+            icon: Icon(icone, color: Colors.green),
+            onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => VetoDetailPage(
-                    nom: nomsVeterinaires[index],
-                    specialite: specialitesVeterinaires[index],
-                  ),
-                ),
+                MaterialPageRoute(builder: (context) => page),
               );
             },
           ),
-        );
-      },
-    );
-  }
-
-  Widget buildRdv() {
-    return ListView.builder(
-      itemCount: rendezVous.length,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(title: Text(rendezVous[index])),
-        );
-      },
-    );
-  }
-
-  Widget buildProfil() {
-    return ListView(
-      padding: const EdgeInsets.all(10),
-      children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
-          child: const ListTile(title: Text("Rex"), subtitle: Text("Chien - Berger - 3 ans")),
         ),
-        Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
-          child: const ListTile(title: Text("Minou"), subtitle: Text("Chat - Européen - 1 an")),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.green),
         ),
-        buildLigneMenu(Icons.folder_shared, "Dossier médical", const DossierMedicalPage()),
-        buildLigneMenu(Icons.vaccines, "Rappels de vaccins", const VaccinsPage()),
-        buildLigneMenu(Icons.sick, "Signaler des symptômes", const SymptomesPage()),
-        buildLigneMenu(Icons.message, "Messagerie", const MessagerieePage()),
-        buildLigneMenu(Icons.article, "Conseils & actualités", const ConseilsPage()),
       ],
-    ); 
+    );
+  }
+
+  Widget buildLigneRaccourcis(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        buildRaccourci(context, Icons.pets, "Animaux", const MesAnimauxPage()),
+        buildRaccourci(context, Icons.event_note, "RDV", const MesRdvPage()),
+        buildRaccourci(context, Icons.message, "Messages", const MessageriePage()),
+        buildRaccourci(context, Icons.article, "Conseils", const ConseilsPage()),
+        buildRaccourci(context, Icons.notifications, "Alertes", const NotificationsPage()),
+      ],
+    );
+  }
+
+  Widget buildVeto(BuildContext context, String nom, String specialite, String note, String distance) {
+    return VetoTile(
+      nom: nom,
+      specialite: specialite,
+      note: note,
+      distance: distance,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VetoDetailPage(nom: nom, specialite: specialite),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -121,33 +112,27 @@ class _ClientHomePageState extends State<ClientHomePage> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
+        centerTitle: true,
         title: const Text("findYourVeto"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsPage()));
-            },
-          ),
-        ],
       ),
-      body: indexActuel == 0
-          ? buildRecherche()
-          : indexActuel == 1
-              ? buildRdv()
-              : buildProfil(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: indexActuel,
-        selectedItemColor: Colors.green,
-        onTap: (index) {
-          setState(() {
-            indexActuel = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Recherche"),
-          BottomNavigationBarItem(icon: Icon(Icons.event_note), label: "RDV"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          buildBarreRecherche(),
+          const SizedBox(height: 15),
+          buildBandeau(),
+          const SizedBox(height: 10),
+          buildLigneRaccourcis(context),
+          const SizedBox(height: 15),
+          const Text(
+            "Les plus proches",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 5),
+          buildVeto(context, "Dr. Diop", "Animaux domestiques", "4.8", "1.2 km"),
+          buildVeto(context, "Dr. Fall", "Élevage bovin", "4.6", "2.4 km"),
+          buildVeto(context, "Dr. Sow", "Chirurgie", "4.3", "3.1 km"),
+          buildVeto(context, "Dr. Ndiaye", "Médecine générale", "4.7", "4.5 km"),
         ],
       ),
     );

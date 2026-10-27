@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bouton_colore.dart';
 
 class SymptomesPage extends StatefulWidget {
   const SymptomesPage({super.key});
@@ -8,7 +9,29 @@ class SymptomesPage extends StatefulWidget {
 }
 
 class _SymptomesPageState extends State<SymptomesPage> {
+  String urgence = "Faible";
   bool envoye = false;
+
+  Widget buildBoutonUrgence(String texte) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              urgence = texte;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: urgence == texte ? Colors.green : Colors.grey[200],
+            foregroundColor: urgence == texte ? Colors.white : Colors.black,
+            padding: const EdgeInsets.all(5),
+          ),
+          child: Text(texte),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,36 +41,52 @@ class _SymptomesPageState extends State<SymptomesPage> {
         foregroundColor: Colors.white,
         title: const Text("Signaler des symptômes"),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const TextField(
-              maxLines: 5,
+        children: [
+          const Text("Niveau d'urgence", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              buildBoutonUrgence("Faible"),
+              buildBoutonUrgence("Modérée"),
+              buildBoutonUrgence("Urgente"),
+            ],
+          ),
+          const SizedBox(height: 25),
+          const Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.only(left: 15),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const TextField(
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
+                border: InputBorder.none,
                 labelText: "Décrivez les symptômes",
+                icon: Icon(Icons.sick, color: Colors.green),
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  envoye = true;
-                });
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text("Envoyer", style: TextStyle(color: Colors.white)),
-            ),
-            const SizedBox(height: 10),
-            if (envoye)
-              const Text(
-                "Formulaire envoyé au vétérinaire.",
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 25),
+          BoutonColore(
+            texteBouton: "Envoyer",
+            onPressed: () {
+              setState(() {
+                envoye = true;
+              });
+            },
+          ),
+          const SizedBox(height: 15),
+          envoye
+              ? const Text(
+                  "Formulaire envoyé au vétérinaire.",
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                )
+              : const SizedBox(),
+        ],
       ),
     );
   }
